@@ -1,0 +1,15 @@
+{
+  "name": "client",
+  "version": "1.0.0",
+  "description": "Client side of Endless Defenders",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Johan & Peter Lind",
+  "license": "ISC",
+  "dependencies": {
+    "phaser": "^3.18.1",
+    "socket.io-client": "^2.2.0"
+  }
+}
