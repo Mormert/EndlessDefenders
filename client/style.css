@@ -1,0 +1,15 @@
+canvas{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    margin-top: -300px;
+    margin-left: -300px;
+
+    border-style: dashed;
+    border-color: gray;
+}
+
+body {
+    margin-top: 25vh;
+    background-color: lightgray;
+}
