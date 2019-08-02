@@ -2,7 +2,7 @@
   "name": "server",
   "version": "1.0.0",
   "description": "Server side for Endless Defenders",
-  "main": "index.js",
+  "main": "web-server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
+    "serve-index": "^1.9.1",
     "socket.io-server": "^1.0.0-b"
   }
 }
