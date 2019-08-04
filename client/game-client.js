@@ -27,6 +27,10 @@ var stats;
 var cursors;
 var lastFired = 0;
 
+var myOwnID;
+
+var otherShips = {};
+
 var game = new Phaser.Game(config);
 
 function preload ()
@@ -53,6 +57,58 @@ function preload ()
 
 function create ()
 {
+
+
+    this.socket = io('192.168.1.121:3000');
+
+    this.socket.on('PlayerXPos', (data) => {
+        //console.log(data['Player']);
+        //console.log(data['PosX']);
+
+        let playerID = data['Player'];
+        if(playerID != myOwnID){
+            otherShips[playerID].x = data['PosX'];
+        }
+        
+
+        
+    });
+
+    this.socket.on('PlayerInfo', (data) => {
+
+        //console.log(data);
+
+        for(let i = 1; i < 5; i++){
+            if(data[i] == true){
+                if(i != myOwnID){
+                    otherShips[i] = this.add.sprite(35 * i + 25,125, 'player_ship_0' + i);
+                    console.log(i);
+                    console.log(otherShips);
+                }
+            }
+        }
+
+        
+
+    });
+
+    this.socket.on('PlayerDisconnect', (data) => {
+
+        otherShips[data].destroy(true);
+        
+    });
+
+    
+
+    
+
+
+    this.socket.on('myOwnID', (data) => {
+        myOwnID = data;
+        ship = this.add.sprite(75, 125, 'player_ship_0' + myOwnID).setDepth(1); 
+    });
+
+
 
     var Bullet = new Phaser.Class({
 
@@ -94,7 +150,7 @@ function create ()
         runChildUpdate: true
     });
 
-    ship = this.add.sprite(75, 125, 'player_ship_01').setDepth(1);    
+       
 
     cursors = this.input.keyboard.createCursorKeys();
     this.input.keyboard.addKeys({ 'up': Phaser.Input.Keyboard.KeyCodes.W, 'down': Phaser.Input.Keyboard.KeyCodes.S });
@@ -126,10 +182,12 @@ function update (time, delta)
     if (cursors.left.isDown)
     {
         ship.x -= speed * delta;
+        this.socket.emit("PlayerXPos", ship.x);
     }
     else if (cursors.right.isDown)
     {
         ship.x += speed * delta;
+        this.socket.emit("PlayerXPos", ship.x);
     }
 
     if (cursors.up.isDown && time > lastFired)
@@ -139,6 +197,7 @@ function update (time, delta)
         if (bullet)
         {
             bullet.fire(ship.x, ship.y);
+            this.socket.emit("PlayerFire", ship.x);
 
             lastFired = time + 50;
         }
