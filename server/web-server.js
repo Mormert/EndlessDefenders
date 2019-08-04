@@ -58,6 +58,22 @@ io.on('connection', function (socket) {
 
     
   });
+
+
+
+  socket.on('PlayerXPos', function(msg)
+  {
+    for (var i=0; i<5; i++) 
+    {
+      if (socket.id==PlayerID[i])
+      {
+        console.log('Player x Pos: ' + i + ': ' + msg);
+        io.emit('PlayerXPos', '{' + i + ',' + msg + '}')
+
+        i=5;
+      }
+    }
+  });
   
 
 
