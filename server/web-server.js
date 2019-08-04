@@ -28,9 +28,9 @@ var playerDataFire = {
 }
 
 
-app.get('/', function (req, res) {
-  res.sendFile(__dirname + '/test.html');
-});
+//app.get('/', function (req, res) {
+//  res.sendFile(__dirname + '/test.html');
+//});
 
 
 io.on('connection', function (socket) {
