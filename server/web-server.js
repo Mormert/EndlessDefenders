@@ -14,6 +14,20 @@ for (var i=0; i<5; i++) {
   PlayerID[i]='';
 }
 
+var conectedPlayers = new Array (5);
+for (var i=0; i<5; i++) {
+  conectedPlayers[i]=false;
+}
+var playerData = {
+  Player: 0,
+  PosX: 0
+}
+var playerDataFire = {
+  Player: 0,
+  PosX: 0
+}
+
+
 app.get('/', function (req, res) {
   res.sendFile(__dirname + '/test.html');
 });
@@ -33,15 +47,17 @@ io.on('connection', function (socket) {
   }
 
   NumberOfConnectedPlayers++;
+  conectedPlayers[NewPlayerConnected]=true
   console.log('A Player connected, Player: ' + NewPlayerConnected);
   PlayerID[NewPlayerConnected] = socket.id
   console.log('Player' + NewPlayerConnected + ' have socket.id: ' + socket.id )
-  socket.emit('text message','Welcome player ' + NewPlayerConnected); // Skickar välkommen endast till uppkoppld spelare
+  socket.emit('myOwnID', NewPlayerConnected); // Skickar välkommen endast till uppkoppld spelare
 
   io.emit('text message', 'Player connected: ' + NewPlayerConnected);
 
   io.emit('text message', "Number of connected users: " + NumberOfConnectedPlayers)
 
+  io.emit('PlayerInfo', conectedPlayers)
 
   socket.on('text message', function (msg) { // Inkommande meddelande från en spelare
     socket.broadcast.emit('text message', socket.id + " " + msg);
@@ -67,19 +83,35 @@ io.on('connection', function (socket) {
     {
       if (socket.id==PlayerID[i])
       {
-        console.log('Player x Pos: ' + i + ': ' + msg);
-        io.emit('PlayerXPos', '{' + i + ',' + msg + '}')
-
+        playerData.Player=i;
+        playerData.PosX=msg
+        console.log('Player x Pos: ' + playerData.Player + ' ' + playerData.PosX);
+        socket.broadcast.emit('PlayerXPos', playerData)
+       
         i=5;
       }
     }
   });
   
-
+  socket.on('PlayerFire', function(msg)
+  {
+    for (var i=0; i<5; i++) 
+    {
+      if (socket.id==PlayerID[i])
+      {
+        playerDataFire.Player=i;
+        playerDataFire.PosX=msg
+        console.log('Player x Pos at fire: ' + playerDataFire.Player + ' ' + playerDataFire.PosX);
+        socket.broadcast.emit('PlayerFire', playerDataFire)
+       
+        i=5;
+      }
+    }
+  });
 
 
   socket.on('disconnect', function () {
-    // Vilken Spelare 
+    // Vilken Spelare disconnectade
     NumberOfConnectedPlayers--;
 
     for (var i=0; i<5; i++) {
@@ -87,6 +119,9 @@ io.on('connection', function (socket) {
       if (socket.id==PlayerID[i]){
         console.log('Player ' + i + ': ' + 'Disconnected');
         io.emit('text message', 'Player ' + i + ': ' + 'Disconnected');
+        conectedPlayers[i]=false
+        io.emit('PlayerInfo', conectedPlayers);
+        io.emit('PlayerDisconnect', i);
         PlayerID[i]='';
         i=5;
       }
