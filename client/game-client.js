@@ -27,9 +27,9 @@ var stats;
 var cursors;
 var lastFired = 0;
 
-var myOwnID;
+var myOwnID = 0;
 
-var otherShips = {};
+var playerShips = {};
 
 var game = new Phaser.Game(config);
 
@@ -67,45 +67,80 @@ function create ()
 
         let playerID = data['Player'];
         if(playerID != myOwnID){
-            otherShips[playerID].x = data['PosX'];
+            playerShips[playerID].x = data['PosX'];
         }
         
 
         
+    });
+
+    for(let i = 1; i < 5; i++){
+
+    }
+
+    playerShips[1] = this.add.sprite(25, -100, 'player_ship_01');
+    playerShips[2] = this.add.sprite(50, -100, 'player_ship_02');
+    playerShips[3] = this.add.sprite(75, -100, 'player_ship_03');
+    playerShips[4] = this.add.sprite(100, -100, 'player_ship_04');
+
+    this.socket.on('text message', (msg) => {
+        alert(msg);
     });
 
     this.socket.on('PlayerInfo', (data) => {
 
-        //console.log(data);
+        if(myOwnID == 0){
+            alert('My Own ID is 0');
+        }
 
         for(let i = 1; i < 5; i++){
             if(data[i] == true){
                 if(i != myOwnID){
-                    otherShips[i] = this.add.sprite(35 * i + 25,125, 'player_ship_0' + i);
+                    playerShips[i].y = 125;
                     console.log(i);
-                    console.log(otherShips);
+                    console.log(playerShips);
                 }
             }
         }
 
-        
+    });
+
+    this.socket.on('disconnect', () => {
+        for(let i = 1; i < 5; i++){
+            //if(i != myOwnID){
+                if(playerShips[i] != null || playerShips[i] != undefined){
+                    //playerShips[i].destroy(true);
+                    playerShips[i].y = -100;
+                    console.log('destroying player ' + i);
+                }
+            //}
+        }
+        //ship.destroy(true);
 
     });
 
-    this.socket.on('PlayerDisconnect', (data) => {
+    this.socket.on('PlayerDisconnect', (playerid) => {
 
-        otherShips[data].destroy(true);
+        //playerShips[data].destroy(true);
+        playerShips[playerid].y = -100;
+        //console.log('DESTROYING PLAYER SHIP' + data);
         
     });
 
+    this.socket.on('reconnect', () => {
+
+    });
     
+    this.socket.on('connect', () => {
 
+    });
     
 
 
     this.socket.on('myOwnID', (data) => {
         myOwnID = data;
-        ship = this.add.sprite(75, 125, 'player_ship_0' + myOwnID).setDepth(1); 
+        //ship = this.add.sprite(75, 125, 'player_ship_0' + myOwnID).setDepth(1);
+        playerShips[myOwnID].y = 125;
     });
 
 
@@ -181,13 +216,13 @@ function update (time, delta)
 
     if (cursors.left.isDown)
     {
-        ship.x -= speed * delta;
-        this.socket.emit("PlayerXPos", ship.x);
+        playerShips[myOwnID].x -= speed * delta;
+        this.socket.emit("PlayerXPos", playerShips[myOwnID].x);
     }
     else if (cursors.right.isDown)
     {
-        ship.x += speed * delta;
-        this.socket.emit("PlayerXPos", ship.x);
+        playerShips[myOwnID].x += speed * delta;
+        this.socket.emit("PlayerXPos", playerShips[myOwnID].x);
     }
 
     if (cursors.up.isDown && time > lastFired)
@@ -196,8 +231,8 @@ function update (time, delta)
 
         if (bullet)
         {
-            bullet.fire(ship.x, ship.y);
-            this.socket.emit("PlayerFire", ship.x);
+            bullet.fire(playerShips[myOwnID].x, playerShips[myOwnID].y);
+            this.socket.emit("PlayerFire", playerShips[myOwnID].x);
 
             lastFired = time + 50;
         }
