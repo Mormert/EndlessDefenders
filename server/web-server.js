@@ -106,7 +106,7 @@ io.on('connection', function (socket) {
         if (socket.id == PlayerID[i]) {
           playerData.Player = i;
           playerData.PosX = msg
-          console.log('Player x Pos: ' + playerData.Player + ' ' + playerData.PosX);
+          //console.log('Player x Pos: ' + playerData.Player + ' ' + playerData.PosX);
           socket.broadcast.emit('PlayerXPos', playerData)
           PlayerXPosOnServer[i]=playerData.PosX;
           i = 5;
@@ -119,7 +119,7 @@ io.on('connection', function (socket) {
         if (socket.id == PlayerID[i]) {
           playerDataFire.Player = i;
           playerDataFire.PosX = msg
-          console.log('Player x Pos at fire: ' + playerDataFire.Player + ' ' + playerDataFire.PosX);
+          //console.log('Player x Pos at fire: ' + playerDataFire.Player + ' ' + playerDataFire.PosX);
           socket.broadcast.emit('PlayerFire', playerDataFire)
 
           i = 5;
