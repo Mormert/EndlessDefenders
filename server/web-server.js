@@ -47,6 +47,14 @@ io.on('connection', function (socket) {
   }
 
   NumberOfConnectedPlayers++;
+  if (NumberOfConnectedPlayers==5) // Se till att det bara går att ansluta 4 spelare
+  {
+    NumberOfConnectedPlayers=4;
+    socket.disconnect(true) // Koppla bort spelare 5 om den försöker ansluta
+  }
+  else
+  {
+
   console.log ('Total number of connected players: '+NumberOfConnectedPlayers )
   conectedPlayers[NewPlayerConnected]=true
   console.log('A Player connected, Player: ' + NewPlayerConnected);
@@ -110,7 +118,7 @@ io.on('connection', function (socket) {
     }
   });
 
-
+}
   socket.on('disconnect', function () {
     // Vilken Spelare disconnectade
     NumberOfConnectedPlayers--;
