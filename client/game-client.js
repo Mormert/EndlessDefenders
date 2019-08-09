@@ -207,27 +207,44 @@ function create ()
 
     var enemyShipArray = Create2DArray(8);
 
-    for(let i = 0; i < 8; i++){
+    for(let i = 0; i < 6; i++){
         for(let j = 0; j < 5; j++){
-            enemyShipArray[i][j] = 3;
+            enemyShipArray[i][j] = this.add.sprite(25 + i * 15, 15 + 15 * j, 'enemy_ship_0' + (j+1));
         }
     }
 
-    enemyShipArray[4][3] = 7.2;
+    let goingRight = true;
 
-    let playerArray = new Array(4);
 
-    for(let i = 0; i < 4; i++){
-        playerArray[i] = {
-            a : 3,
-            b : 2
+    let y=0;
+
+    setInterval(() => {
+
+        if(enemyShipArray[5][0].x > 140){
+            goingRight = false;
+            y = 2;
+        }else
+        if(enemyShipArray[0][0].x < 10){
+            goingRight = true;
+            y = 2;
         }
-    }
 
+        for(let i = 0; i < 6; i++){
+            for(let j = 0; j < 5; j++){
+                if(goingRight){
+                    enemyShipArray[i][j].x += 2;
+                    enemyShipArray[i][j].y += y;
 
-    console.log(playerArray);
-
-
+                }
+                else // going left
+                { 
+                    enemyShipArray[i][j].x -= 2;
+                    enemyShipArray[i][j].y += y;
+                }
+            }
+        }
+        y = 0;
+    }, 250);
 
     console.log(enemyShipArray);
     console.log(enemyShipArray[4][3]);
@@ -241,7 +258,7 @@ function create ()
       
         return arr;
     }
-
+/*
     for (let i = 0; i < 8; i++) {
         this.add.sprite(25 + i * 15, 15, 'enemy_ship_01');
     }
@@ -257,7 +274,7 @@ function create ()
     for (let i = 0; i < 8; i++) {
         this.add.sprite(25 + i * 15, 75, 'enemy_ship_05');
     }
-
+*/
 
     //speed = Phaser.Math.GetSpeed(300, 1);
     speed = 0.05;
