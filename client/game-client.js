@@ -18,7 +18,7 @@ const config = {
     //     gravity: { y: 250 },
     //   }
     // },
-  };
+};
 
 var bullets;
 var ship;
@@ -33,9 +33,8 @@ var playerShips = {};
 
 var game = new Phaser.Game(config);
 
-function preload ()
-{
-   
+function preload() {
+
 
     this.load.setBaseURL('../public/assets/')
 
@@ -47,7 +46,7 @@ function preload ()
     this.load.image('enemy_ship_04', '/enemy_ship_04.png');
     this.load.image('enemy_ship_05', '/enemy_ship_05.png');
     this.load.image('enemy_ship_06', '/enemy_ship_06.png');
-    
+
     this.load.image('player_ship_01', '/player_ship_01.png');
     this.load.image('player_ship_02', '/player_ship_02.png');
     this.load.image('player_ship_03', '/player_ship_03.png');
@@ -55,8 +54,7 @@ function preload ()
 
 }
 
-function create ()
-{
+function create() {
 
 
     this.socket = io('192.168.1.121:3000');
@@ -66,15 +64,15 @@ function create ()
         //console.log(data['PosX']);
 
         let playerID = data['Player'];
-        if(playerID != myOwnID){
+        if (playerID != myOwnID) {
             playerShips[playerID].x = data['PosX'];
         }
-        
 
-        
+
+
     });
 
-    for(let i = 1; i < 5; i++){
+    for (let i = 1; i < 5; i++) {
 
     }
 
@@ -89,13 +87,13 @@ function create ()
 
     this.socket.on('PlayerInfo', (data) => {
 
-        if(myOwnID == 0){
+        if (myOwnID == 0) {
             alert('My Own ID is 0');
         }
 
-        for(let i = 1; i < 5; i++){
-            if(data[i] == true){
-                if(i != myOwnID){
+        for (let i = 1; i < 5; i++) {
+            if (data[i] == true) {
+                if (i != myOwnID) {
                     playerShips[i].y = 125;
                     console.log(i);
                     console.log(playerShips);
@@ -106,13 +104,13 @@ function create ()
     });
 
     this.socket.on('disconnect', () => {
-        for(let i = 1; i < 5; i++){
+        for (let i = 1; i < 5; i++) {
             //if(i != myOwnID){
-                if(playerShips[i] != null || playerShips[i] != undefined){
-                    //playerShips[i].destroy(true);
-                    playerShips[i].y = -100;
-                    console.log('destroying player ' + i);
-                }
+            if (playerShips[i] != null || playerShips[i] != undefined) {
+                //playerShips[i].destroy(true);
+                playerShips[i].y = -100;
+                console.log('destroying player ' + i);
+            }
             //}
         }
         //ship.destroy(true);
@@ -124,17 +122,17 @@ function create ()
         //playerShips[data].destroy(true);
         playerShips[playerid].y = -100;
         //console.log('DESTROYING PLAYER SHIP' + data);
-        
+
     });
 
     this.socket.on('reconnect', () => {
 
     });
-    
+
     this.socket.on('connect', () => {
 
     });
-    
+
 
 
     this.socket.on('myOwnID', (data) => {
@@ -151,27 +149,23 @@ function create ()
 
         initialize:
 
-        function Bullet (scene)
-        {
-            Phaser.GameObjects.Image.call(this, scene, 0, 0, 'bullet');
+            function Bullet(scene) {
+                Phaser.GameObjects.Image.call(this, scene, 0, 0, 'bullet');
 
-            this.speed = 0.1;
-        },
+                this.speed = 0.1;
+            },
 
-        fire: function (x, y)
-        {
+        fire: function (x, y) {
             this.setPosition(x, y - 5);
 
             this.setActive(true);
             this.setVisible(true);
         },
 
-        update: function (time, delta)
-        {
+        update: function (time, delta) {
             this.y -= this.speed * delta;
 
-            if (this.y < -50)
-            {
+            if (this.y < -50) {
                 this.setActive(false);
                 this.setVisible(false);
             }
@@ -185,121 +179,56 @@ function create ()
         runChildUpdate: true
     });
 
-       
+
 
     cursors = this.input.keyboard.createCursorKeys();
     this.input.keyboard.addKeys({ 'up': Phaser.Input.Keyboard.KeyCodes.W, 'down': Phaser.Input.Keyboard.KeyCodes.S });
 
-    // let rowsWithShips = new Array(8);
-
-    // for(let i = 0; i < rowsWithShips.length; i++){
-    //     columnsWithShips = new Array(5);
-    //     columnsWithShips[i] = i+3;
-    // }
-
-    // console.log(rowsWithShips);
-
-    // for(let i = 0; i < rowsWithShips.length; i++){
-    //     for(let j = 0; j< columnsWithShips.length; j++){
-    //         console.log("column: " + i, + ", row: " + j);
-    //     }
-    // }
-
     var enemyShipArray = Create2DArray(8);
-
-    for(let i = 0; i < 6; i++){
-        for(let j = 0; j < 5; j++){
-            enemyShipArray[i][j] = this.add.sprite(25 + i * 15, 15 + 15 * j, 'enemy_ship_0' + (j+1));
-        }
-    }
-
-    let goingRight = true;
-
-
-    let y=0;
-
-    setInterval(() => {
-
-        if(enemyShipArray[5][0].x > 140){
-            goingRight = false;
-            y = 2;
-        }else
-        if(enemyShipArray[0][0].x < 10){
-            goingRight = true;
-            y = 2;
-        }
-
-        for(let i = 0; i < 6; i++){
-            for(let j = 0; j < 5; j++){
-                if(goingRight){
-                    enemyShipArray[i][j].x += 2;
-                    enemyShipArray[i][j].y += y;
-
-                }
-                else // going left
-                { 
-                    enemyShipArray[i][j].x -= 2;
-                    enemyShipArray[i][j].y += y;
-                }
-            }
-        }
-        y = 0;
-    }, 250);
-
-    console.log(enemyShipArray);
-    console.log(enemyShipArray[4][3]);
 
     function Create2DArray(rows) {
         var arr = [];
-      
-        for (var i=0;i<rows;i++) {
-           arr[i] = [];
+
+        for (var i = 0; i < rows; i++) {
+            arr[i] = [];
         }
-      
         return arr;
     }
-/*
-    for (let i = 0; i < 8; i++) {
-        this.add.sprite(25 + i * 15, 15, 'enemy_ship_01');
-    }
-    for (let i = 0; i < 8; i++) {
-        this.add.sprite(25 + i * 15, 30, 'enemy_ship_02');
-    }
-    for (let i = 0; i < 8; i++) {
-        this.add.sprite(25 + i * 15, 45, 'enemy_ship_03');
-    }
-    for (let i = 0; i < 8; i++) {
-        this.add.sprite(25 + i * 15, 60, 'enemy_ship_04');
-    }
-    for (let i = 0; i < 8; i++) {
-        this.add.sprite(25 + i * 15, 75, 'enemy_ship_05');
-    }
-*/
 
-    //speed = Phaser.Math.GetSpeed(300, 1);
+    for (let i = 0; i < 6; i++) {
+        for (let j = 0; j < 5; j++) {
+            //enemyShipArray[i][j] = this.add.sprite(25 + i * 15, 15 + 15 * j, 'enemy_ship_0' + (j + 1));
+            enemyShipArray[i][j] = this.add.sprite(-100,-100, 'enemy_ship_0' + (j + 1));
+        }
+    }
+
+    this.socket.on('EnemyData', (data) => {
+        for (let i = 0; i < 6; i++) {
+            for (let j = 0; j < 5; j++) {
+                enemyShipArray[i][j].x = data[i][j].posx;
+                enemyShipArray[i][j].y = data[i][j].posy;
+            }
+        }
+    });
+
     speed = 0.05;
 }
 
-function update (time, delta)
-{
+function update(time, delta) {
 
-    if (cursors.left.isDown)
-    {
+    if (cursors.left.isDown) {
         playerShips[myOwnID].x -= speed * delta;
         this.socket.emit("PlayerXPos", playerShips[myOwnID].x);
     }
-    else if (cursors.right.isDown)
-    {
+    else if (cursors.right.isDown) {
         playerShips[myOwnID].x += speed * delta;
         this.socket.emit("PlayerXPos", playerShips[myOwnID].x);
     }
 
-    if (cursors.up.isDown && time > lastFired)
-    {
+    if (cursors.up.isDown && time > lastFired) {
         var bullet = bullets.get();
 
-        if (bullet)
-        {
+        if (bullet) {
             bullet.fire(playerShips[myOwnID].x, playerShips[myOwnID].y);
             this.socket.emit("PlayerFire", playerShips[myOwnID].x);
 
