@@ -50,6 +50,19 @@ var playerDataFire = {
   PosX: 0
 }
 
+var enemyShipArray = Create2DArray(8);
+
+for (let i = 0; i < 6; i++) {
+  for (let j = 0; j < 5; j++) {
+    enemyShipArray[i][j] = {
+      posx: 25 + i * 15,
+      posy: 15 + 15 * j,
+      alive: true
+    }
+
+
+  }
+}
 
 //app.get('/', function (req, res) {
 //  res.sendFile(__dirname + '/test.html');
@@ -58,11 +71,7 @@ var playerDataFire = {
 
 io.on('connection', function (socket) {
   // Ny spelare ansluter
-
-
-
   for (var i = 1; i < 5; i++) {
-
     if (PlayerID[i] == '') {
       NewPlayerConnected = i; // Anger vilken spelare som ansluter. Första lediga
       i = 5;
@@ -76,7 +85,7 @@ io.on('connection', function (socket) {
     socket.disconnect(true) // Koppla bort spelare 5 om den försöker ansluta
   }
   else {
-    PlayerXPosOnServer[NewPlayerConnected]= NewPlayerConnected*25;
+    PlayerXPosOnServer[NewPlayerConnected] = NewPlayerConnected * 25;
     console.log('Total number of connected players: ' + NumberOfConnectedPlayers)
     conectedPlayers[NewPlayerConnected] = true
     console.log('A Player connected, Player: ' + NewPlayerConnected);
@@ -90,6 +99,7 @@ io.on('connection', function (socket) {
 
     io.emit('PlayerInfo', conectedPlayers);
     console.log('PlayerInfo: ' + conectedPlayers);
+    io.emit('EnemyData', enemyShipArray); // Skicka fiendeskeppens position
 
     for (var i = 1; i < 5; i++) {
       playerData.Player = i;
@@ -100,24 +110,16 @@ io.on('connection', function (socket) {
     }
 
     socket.on('text message', function (msg) { // Inkommande meddelande från en spelare
-
-
       //socket.broadcast.emit('text message', socket.id + " " + msg);
       // Vilken spelare kom meddelande ifrån?
-
       for (var i = 0; i < 5; i++) {
-
         if (socket.id == PlayerID[i]) {
           console.log('message from player: ' + i + ': ' + msg);
           //socket.broadcast.emit('text message', 'message from player ' + i + ": " + msg);
           i = 5;
         }
       }
-
-
     });
-
-
 
     socket.on('PlayerXPos', function (msg) {
       for (var i = 0; i < 5; i++) {
@@ -126,7 +128,7 @@ io.on('connection', function (socket) {
           playerData.PosX = msg
           //console.log('Player x Pos: ' + playerData.Player + ' ' + playerData.PosX);
           socket.broadcast.emit('PlayerXPos', playerData)
-          PlayerXPosOnServer[i]=playerData.PosX;
+          PlayerXPosOnServer[i] = playerData.PosX;
           i = 5;
         }
       }
@@ -145,94 +147,79 @@ io.on('connection', function (socket) {
       }
     });
 
-  }
-  var enemyShipArray = Create2DArray(8);
+    socket.on('EnemyShipDied', function (data) {
+      enemyShipArray[data.x][data.y] = false;
+      io.emit('EnemyData', enemyShipArray);
+      console.log("EnemyDesroyed")
+    });
 
-    for(let i = 0; i < 6; i++){
-        for(let j = 0; j < 5; j++){
-            enemyShipArray[i][j] = {
-              posx: 25 + i * 15,
-              posy: 15 + 15 * j,
-              alive: true 
-            }
-            
-          
+    socket.on('disconnect', function () {
+      // Vilken Spelare disconnectade
+      NumberOfConnectedPlayers--;
+
+      for (var i = 0; i < 5; i++) {
+
+        if (socket.id == PlayerID[i]) {
+          console.log('Player ' + i + ': ' + 'Disconnected');
+          //io.emit('text message', 'Player ' + i + ': ' + 'Disconnected');
+          conectedPlayers[i] = false
+          io.emit('PlayerInfo', conectedPlayers);
+          io.emit('PlayerDisconnect', i);
+          PlayerID[i] = '';
+          i = 5;
         }
-    }
-
-    let goingRight = true;
-
-
-    let y=0;
-
-    setInterval(() => {
-
-        if(enemyShipArray[5][0].posx > 140){
-            goingRight = false;
-            y = 2;
-        }else
-        if(enemyShipArray[0][0].posx < 10){
-            goingRight = true;
-            y = 2;
-        }
-
-        for(let i = 0; i < 6; i++){
-            for(let j = 0; j < 5; j++){
-                if(goingRight){
-                    enemyShipArray[i][j].posx += 2;
-                    enemyShipArray[i][j].posy += y;
-
-                }
-                else // going left
-                { 
-                    enemyShipArray[i][j].posx -= 2;
-                    enemyShipArray[i][j].posy += y;
-                }
-            }
-        }
-        y = 0;
-        io.emit('EnemyData', enemyShipArray);
-        //console.log('EnemyData: ' + enemyShipArray[2][2].posx);
-    }, 250);
-
-    function Create2DArray(rows) {
-      var arr = [];
-    
-      for (var i=0;i<rows;i++) {
-         arr[i] = [];
       }
-    
-      return arr;
-  }
-  socket.on ('EnemyShipDied', function (data) {
-    enemyShipArray[data.x][data.y]=false;
-    io.emit('EnemyData', enemyShipArray);
-
-  });
-
-  socket.on('disconnect', function () {
-    // Vilken Spelare disconnectade
-    NumberOfConnectedPlayers--;
-
-    for (var i = 0; i < 5; i++) {
-
-      if (socket.id == PlayerID[i]) {
-        console.log('Player ' + i + ': ' + 'Disconnected');
-        //io.emit('text message', 'Player ' + i + ': ' + 'Disconnected');
-        conectedPlayers[i] = false
-        io.emit('PlayerInfo', conectedPlayers);
-        io.emit('PlayerDisconnect', i);
-        PlayerID[i] = '';
-        i = 5;
-      }
-    }
-
-
-  });
+    });
+  };
 });
 
+let goingRight = true;
 
 
+let y = 0;
+
+setInterval(() => {
+
+  if (enemyShipArray[5][0].posx > 140) {
+    goingRight = false;
+    y = 2;
+  } else
+    if (enemyShipArray[0][0].posx < 10) {
+      goingRight = true;
+      y = 2;
+    }
+    if (enemyShipArray[0][0].posy>50){
+      y=-45;
+    }
+  for (let i = 0; i < 6; i++) {
+    for (let j = 0; j < 5; j++) {
+      if (goingRight) {
+        enemyShipArray[i][j].posx += 2;
+        enemyShipArray[i][j].posy += y;
+
+      }
+      else // going left
+      {
+        enemyShipArray[i][j].posx -= 2;
+        enemyShipArray[i][j].posy += y;
+      }
+    }
+  }
+  y = 0;
+  io.emit('EnemyData', enemyShipArray);
+
+  //console.log('EnemyData: ' + enemyShipArray[2][2].posx);
+}, 500);
+
+function Create2DArray(rows) {
+  var arr = [];
+
+  for (var i = 0; i < rows; i++) {
+    arr[i] = [];
+  }
+
+  return arr;
+}
 
 
 http.listen(3000, function () {
