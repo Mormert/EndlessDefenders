@@ -1,3 +1,21 @@
+
+
+
+
+/*
+
+let playerArray = new Array(4);
+
+for(let i = 0; i < 4; i++){
+    playerArray[i] = {
+        a : 3,
+        b : 2
+    }
+}
+
+
+*/
+
 var express = require('express');
 var app = express();
 var http = require('http').createServer(app);

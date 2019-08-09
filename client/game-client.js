@@ -190,6 +190,58 @@ function create ()
     cursors = this.input.keyboard.createCursorKeys();
     this.input.keyboard.addKeys({ 'up': Phaser.Input.Keyboard.KeyCodes.W, 'down': Phaser.Input.Keyboard.KeyCodes.S });
 
+    // let rowsWithShips = new Array(8);
+
+    // for(let i = 0; i < rowsWithShips.length; i++){
+    //     columnsWithShips = new Array(5);
+    //     columnsWithShips[i] = i+3;
+    // }
+
+    // console.log(rowsWithShips);
+
+    // for(let i = 0; i < rowsWithShips.length; i++){
+    //     for(let j = 0; j< columnsWithShips.length; j++){
+    //         console.log("column: " + i, + ", row: " + j);
+    //     }
+    // }
+
+    var enemyShipArray = Create2DArray(8);
+
+    for(let i = 0; i < 8; i++){
+        for(let j = 0; j < 5; j++){
+            enemyShipArray[i][j] = 3;
+        }
+    }
+
+    enemyShipArray[4][3] = 7.2;
+
+    let playerArray = new Array(4);
+
+    for(let i = 0; i < 4; i++){
+        playerArray[i] = {
+            a : 3,
+            b : 2
+        }
+    }
+
+
+    console.log(playerArray);
+
+
+
+    console.log(enemyShipArray);
+    console.log(enemyShipArray[4][3]);
+
+    function Create2DArray(rows) {
+        var arr = [];
+      
+        for (var i=0;i<rows;i++) {
+           arr[i] = [];
+        }
+      
+        return arr;
+    }
+
     for (let i = 0; i < 8; i++) {
         this.add.sprite(25 + i * 15, 15, 'enemy_ship_01');
     }
