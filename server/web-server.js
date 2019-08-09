@@ -146,6 +146,70 @@ io.on('connection', function (socket) {
     });
 
   }
+  var enemyShipArray = Create2DArray(8);
+
+    for(let i = 0; i < 6; i++){
+        for(let j = 0; j < 5; j++){
+            enemyShipArray[i][j] = {
+              posx: 25 + i * 15,
+              posy: 15 + 15 * j,
+              alive: true 
+            }
+            
+          
+        }
+    }
+
+    let goingRight = true;
+
+
+    let y=0;
+
+    setInterval(() => {
+
+        if(enemyShipArray[5][0].posx > 140){
+            goingRight = false;
+            y = 2;
+        }else
+        if(enemyShipArray[0][0].posx < 10){
+            goingRight = true;
+            y = 2;
+        }
+
+        for(let i = 0; i < 6; i++){
+            for(let j = 0; j < 5; j++){
+                if(goingRight){
+                    enemyShipArray[i][j].posx += 2;
+                    enemyShipArray[i][j].posy += y;
+
+                }
+                else // going left
+                { 
+                    enemyShipArray[i][j].posx -= 2;
+                    enemyShipArray[i][j].posy += y;
+                }
+            }
+        }
+        y = 0;
+        io.emit('EnemyData', enemyShipArray);
+        //console.log('EnemyData: ' + enemyShipArray[2][2].posx);
+    }, 250);
+
+    function Create2DArray(rows) {
+      var arr = [];
+    
+      for (var i=0;i<rows;i++) {
+         arr[i] = [];
+      }
+    
+      return arr;
+  }
+  socket.on ('EnemyShipDied', function (data) {
+    enemyShipArray[data.x][data.y]=false;
+    io.emit('EnemyData', enemyShipArray);
+
+  });
+
   socket.on('disconnect', function () {
     // Vilken Spelare disconnectade
     NumberOfConnectedPlayers--;
