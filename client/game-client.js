@@ -59,9 +59,9 @@ function preload() {
 function create() {
 
 
-    this.socket = io('localhost:3000');
+    socket = io('localhost:3000');
 
-    this.socket.on('PlayerXPos', (data) => {
+    socket.on('PlayerXPos', (data) => {
         //console.log(data['Player']);
         //console.log(data['PosX']);
 
@@ -79,11 +79,11 @@ function create() {
     playerShips[3] = this.add.sprite(75, -100, 'player_ship_03');
     playerShips[4] = this.add.sprite(100, -100, 'player_ship_04');
 
-    this.socket.on('text message', (msg) => {
+    socket.on('text message', (msg) => {
         alert(msg);
     });
 
-    this.socket.on('PlayerInfo', (data) => {
+    socket.on('PlayerInfo', (data) => {
 
         if (myOwnID == 0) {
             alert('My Own ID is 0');
@@ -101,7 +101,7 @@ function create() {
 
     });
 
-    this.socket.on('disconnect', () => {
+    socket.on('disconnect', () => {
         for (let i = 1; i < 5; i++) {
             //if(i != myOwnID){
             if (playerShips[i] != null || playerShips[i] != undefined) {
@@ -115,7 +115,7 @@ function create() {
 
     });
 
-    this.socket.on('PlayerDisconnect', (playerid) => {
+    socket.on('PlayerDisconnect', (playerid) => {
 
         //playerShips[data].destroy(true);
         playerShips[playerid].y = -100;
@@ -123,24 +123,24 @@ function create() {
 
     });
 
-    this.socket.on('reconnect', () => {
+    socket.on('reconnect', () => {
 
     });
 
-    this.socket.on('connect', () => {
+    socket.on('connect', () => {
 
     });
 
 
 
-    this.socket.on('myOwnID', (data) => {
+    socket.on('myOwnID', (data) => {
         myOwnID = data;
         //ship = this.add.sprite(75, 125, 'player_ship_0' + myOwnID).setDepth(1);
         playerShips[myOwnID].y = 125;
     });
 
 
-    this.socket.on('PlayerFire', (data) => {
+    socket.on('PlayerFire', (data) => {
         var bullet = otherPlayersBullets.get();
 
         if (bullet) {
@@ -181,14 +181,12 @@ function create() {
                         this.setActive(false);
                         this.setVisible(false);
                         
-                        // if(this.myBullet){
-                        //     socket.emit("EnemyShipDied", () => {
-                        //         x = i;
-                        //         y = j;
-                        //     });
-                        // }
-
-
+                        if(this.myBullet){
+                            socket.emit("EnemyShipDied", {
+                                enemyx : i,
+                                enemyy : j
+                            });
+                        }
                         break;
                     }
                 }
@@ -221,7 +219,7 @@ function create() {
 
     otherPlayersBullets = this.add.group({
         classType: Bullet,
-        maxSize: 10,
+        maxSize: 2,
         runChildUpdate: true
     });
 
@@ -248,7 +246,7 @@ function create() {
         }
     }
 
-    this.socket.on('EnemyData', (data) => {
+    socket.on('EnemyData', (data) => {
         for (let i = 0; i < 6; i++) {
             for (let j = 0; j < 5; j++) {
                 enemyShipArray[i][j].x = data[i][j].posx;
@@ -264,11 +262,11 @@ function update(time, delta) {
 
     if (cursors.left.isDown) {
         playerShips[myOwnID].x -= speed * delta;
-        this.socket.emit("PlayerXPos", playerShips[myOwnID].x);
+        socket.emit("PlayerXPos", playerShips[myOwnID].x);
     }
     else if (cursors.right.isDown) {
         playerShips[myOwnID].x += speed * delta;
-        this.socket.emit("PlayerXPos", playerShips[myOwnID].x);
+        socket.emit("PlayerXPos", playerShips[myOwnID].x);
     }
 
     if (cursors.up.isDown && time > lastFired) {
@@ -276,7 +274,7 @@ function update(time, delta) {
 
         if (bullet) {
             bullet.fire(playerShips[myOwnID].x, playerShips[myOwnID].y);
-            this.socket.emit("PlayerFire", playerShips[myOwnID].x);
+            socket.emit("PlayerFire", playerShips[myOwnID].x);
 
             lastFired = time + 50;
         }

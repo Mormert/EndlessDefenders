@@ -148,9 +148,9 @@ io.on('connection', function (socket) {
     });
 
     socket.on('EnemyShipDied', function (data) {
-      enemyShipArray[data.x][data.y] = false;
+      enemyShipArray[data.enemyx][data.enemyy] = false;
       io.emit('EnemyData', enemyShipArray);
-      console.log("EnemyDesroyed")
+      console.log(data.enemyx +" "+ data.enemyy)
     });
 
     socket.on('disconnect', function () {
