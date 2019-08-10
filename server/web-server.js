@@ -209,7 +209,7 @@ setInterval(() => {
   io.emit('EnemyData', enemyShipArray);
 
   //console.log('EnemyData: ' + enemyShipArray[2][2].posx);
-}, 500);
+}, 250);
 
 function Create2DArray(rows) {
   var arr = [];
