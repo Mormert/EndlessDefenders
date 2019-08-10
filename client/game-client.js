@@ -20,7 +20,7 @@ const config = {
     // },
 };
 
-var bullets;
+var myBullets;
 var ship;
 var speed;
 var stats;
@@ -28,8 +28,10 @@ var cursors;
 var lastFired = 0;
 
 var myOwnID = 0;
+let socket;
 
 var playerShips = {};
+var enemyShipArray;
 
 var game = new Phaser.Game(config);
 
@@ -57,7 +59,7 @@ function preload() {
 function create() {
 
 
-    this.socket = io('192.168.1.121:3000');
+    this.socket = io('localhost:3000');
 
     this.socket.on('PlayerXPos', (data) => {
         //console.log(data['Player']);
@@ -71,10 +73,6 @@ function create() {
 
 
     });
-
-    for (let i = 1; i < 5; i++) {
-
-    }
 
     playerShips[1] = this.add.sprite(25, -100, 'player_ship_01');
     playerShips[2] = this.add.sprite(50, -100, 'player_ship_02');
@@ -142,18 +140,26 @@ function create() {
     });
 
 
+    this.socket.on('PlayerFire', (data) => {
+        var bullet = otherPlayersBullets.get();
+
+        if (bullet) {
+            bullet.fire(playerShips[data.Player].x, playerShips[data.Player].y);
+            bullet.myBullet = false;
+        }
+    });
 
     var Bullet = new Phaser.Class({
 
         Extends: Phaser.GameObjects.Image,
 
-        initialize:
+        myBullet: true,
 
-            function Bullet(scene) {
-                Phaser.GameObjects.Image.call(this, scene, 0, 0, 'bullet');
+        initialize: function Bullet(scene) {
+            Phaser.GameObjects.Image.call(this, scene, 0, 0, 'bullet');
 
-                this.speed = 0.1;
-            },
+            this.speed = 0.1;
+        },
 
         fire: function (x, y) {
             this.setPosition(x, y - 5);
@@ -165,17 +171,57 @@ function create() {
         update: function (time, delta) {
             this.y -= this.speed * delta;
 
+            
+            for(let i = 0; i < 6 ; i++){
+                for(let j = 0; j < 5; j++){
+                    if(this.distance(enemyShipArray[i][j].x, enemyShipArray[i][j].y, this.x, this.y) < 7){
+                        console.log('hit!');
+
+                        this.y = -50;
+                        this.setActive(false);
+                        this.setVisible(false);
+                        
+                        // if(this.myBullet){
+                        //     socket.emit("EnemyShipDied", () => {
+                        //         x = i;
+                        //         y = j;
+                        //     });
+                        // }
+
+
+                        break;
+                    }
+                }
+            }
+            
+            
+
             if (this.y < -50) {
                 this.setActive(false);
                 this.setVisible(false);
             }
+        },
+
+        distance: function (x1, y1, x2, y2) {
+
+            var dx = x1 - x2;
+            var dy = y1 - y2;
+    
+            return Math.sqrt(dx * dx + dy * dy);
+    
         }
 
     });
 
-    bullets = this.add.group({
+    myBullets = this.add.group({
         classType: Bullet,
         maxSize: 2,
+        runChildUpdate: true
+    });
+
+    otherPlayersBullets = this.add.group({
+        classType: Bullet,
+        maxSize: 10,
         runChildUpdate: true
     });
 
@@ -184,7 +230,7 @@ function create() {
     cursors = this.input.keyboard.createCursorKeys();
     this.input.keyboard.addKeys({ 'up': Phaser.Input.Keyboard.KeyCodes.W, 'down': Phaser.Input.Keyboard.KeyCodes.S });
 
-    var enemyShipArray = Create2DArray(8);
+    enemyShipArray = Create2DArray(8);
 
     function Create2DArray(rows) {
         var arr = [];
@@ -226,7 +272,7 @@ function update(time, delta) {
     }
 
     if (cursors.up.isDown && time > lastFired) {
-        var bullet = bullets.get();
+        var bullet = myBullets.get();
 
         if (bullet) {
             bullet.fire(playerShips[myOwnID].x, playerShips[myOwnID].y);
