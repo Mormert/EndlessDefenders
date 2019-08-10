@@ -58,30 +58,19 @@ function preload() {
 
 function create() {
 
-
-    socket = io('localhost:3000');
+    socket = io('192.168.1.252:3000');
 
     socket.on('PlayerXPos', (data) => {
-        //console.log(data['Player']);
-        //console.log(data['PosX']);
-
         let playerID = data['Player'];
         if (playerID != myOwnID) {
             playerShips[playerID].x = data['PosX'];
         }
-
-
-
     });
 
     playerShips[1] = this.add.sprite(25, -100, 'player_ship_01');
     playerShips[2] = this.add.sprite(50, -100, 'player_ship_02');
     playerShips[3] = this.add.sprite(75, -100, 'player_ship_03');
     playerShips[4] = this.add.sprite(100, -100, 'player_ship_04');
-
-    socket.on('text message', (msg) => {
-        alert(msg);
-    });
 
     socket.on('PlayerInfo', (data) => {
 
@@ -103,24 +92,16 @@ function create() {
 
     socket.on('disconnect', () => {
         for (let i = 1; i < 5; i++) {
-            //if(i != myOwnID){
             if (playerShips[i] != null || playerShips[i] != undefined) {
                 //playerShips[i].destroy(true);
                 playerShips[i].y = -100;
                 console.log('destroying player ' + i);
             }
-            //}
         }
-        //ship.destroy(true);
-
     });
 
     socket.on('PlayerDisconnect', (playerid) => {
-
-        //playerShips[data].destroy(true);
         playerShips[playerid].y = -100;
-        //console.log('DESTROYING PLAYER SHIP' + data);
-
     });
 
     socket.on('reconnect', () => {
@@ -135,7 +116,6 @@ function create() {
 
     socket.on('myOwnID', (data) => {
         myOwnID = data;
-        //ship = this.add.sprite(75, 125, 'player_ship_0' + myOwnID).setDepth(1);
         playerShips[myOwnID].y = 125;
     });
 
@@ -146,6 +126,15 @@ function create() {
         if (bullet) {
             bullet.fire(playerShips[data.Player].x, playerShips[data.Player].y);
             bullet.myBullet = false;
+        }
+    });
+
+    socket.on('EnemyData', (data) => {
+        for (let i = 0; i < 6; i++) {
+            for (let j = 0; j < 5; j++) {
+                enemyShipArray[i][j].x = data[i][j].posx;
+                enemyShipArray[i][j].y = data[i][j].posy;
+            }
         }
     });
 
@@ -192,8 +181,6 @@ function create() {
                 }
             }
             
-            
-
             if (this.y < -50) {
                 this.setActive(false);
                 this.setVisible(false);
@@ -201,14 +188,10 @@ function create() {
         },
 
         distance: function (x1, y1, x2, y2) {
-
             var dx = x1 - x2;
             var dy = y1 - y2;
-    
             return Math.sqrt(dx * dx + dy * dy);
-    
         }
-
     });
 
     myBullets = this.add.group({
@@ -222,8 +205,6 @@ function create() {
         maxSize: 2,
         runChildUpdate: true
     });
-
-
 
     cursors = this.input.keyboard.createCursorKeys();
     this.input.keyboard.addKeys({ 'up': Phaser.Input.Keyboard.KeyCodes.W, 'down': Phaser.Input.Keyboard.KeyCodes.S });
@@ -245,15 +226,6 @@ function create() {
             enemyShipArray[i][j] = this.add.sprite(-100,-100, 'enemy_ship_0' + (j + 1));
         }
     }
-
-    socket.on('EnemyData', (data) => {
-        for (let i = 0; i < 6; i++) {
-            for (let j = 0; j < 5; j++) {
-                enemyShipArray[i][j].x = data[i][j].posx;
-                enemyShipArray[i][j].y = data[i][j].posy;
-            }
-        }
-    });
 
     speed = 0.05;
 }
