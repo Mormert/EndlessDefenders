@@ -27,6 +27,8 @@ var NumberOfConnectedPlayers = 0;
 
 var NewPlayerConnected = 0;
 
+var NumberOfEnemysAlive = 30;
+
 var PlayerXPosOnServer = new Array(5);
 for (var i = 0; i < 5; i++) {
   PlayerXPosOnServer[i] = 25 * i;
@@ -57,7 +59,8 @@ for (let i = 0; i < 6; i++) {
     enemyShipArray[i][j] = {
       posx: 25 + i * 15,
       posy: 15 + 15 * j,
-      alive: true
+      alive: true,
+      hp: 3
     }
 
 
@@ -148,10 +151,19 @@ io.on('connection', function (socket) {
     });
 
     socket.on('EnemyShipDied', function (data) {
-      enemyShipArray[data.enemyx][data.enemyy] = false;
+      enemyShipArray[data.enemyx][data.enemyy].hp--;
+      if (enemyShipArray[data.enemyx][data.enemyy].hp <= 0) { // Enemy dies
+        enemyShipArray[data.enemyx][data.enemyy] = false;
+        NumberOfEnemysAlive--;
+      }
       io.emit('EnemyData', enemyShipArray);
-      console.log(data.enemyx +" "+ data.enemyy)
+      console.log('Hitting enemy: ' + data.enemyx + " " + data.enemyy);
+      console.log('Enemy HP: ' + enemyShipArray[data.enemyx][data.enemyy].hp);
     });
+
+    if (NumberOfEnemysAlive <= 0) {
+      io.emit('PlayerWinns');
+    }
 
     socket.on('disconnect', function () {
       // Vilken Spelare disconnectade
@@ -178,7 +190,7 @@ let goingRight = true;
 
 let y = 0;
 
-setInterval(() => {
+var refreshIntervalId = setInterval(() => {
 
   if (enemyShipArray[5][0].posx > 140) {
     goingRight = false;
@@ -188,9 +200,11 @@ setInterval(() => {
       goingRight = true;
       y = 2;
     }
-    if (enemyShipArray[0][0].posy>50){
-      y=-45;
-    }
+  if (enemyShipArray[0][0].posy > 50) {
+    y = -45;
+    io.emit('EnemyWinns');
+    clearInterval(refreshIntervalId);
+  }
   for (let i = 0; i < 6; i++) {
     for (let j = 0; j < 5; j++) {
       if (goingRight) {
@@ -208,8 +222,15 @@ setInterval(() => {
   y = 0;
   io.emit('EnemyData', enemyShipArray);
 
+  var EnemyRandom = {
+    ShipX: Math.floor(Math.random() * 6),
+    ShopY: Math.floor(Math.random() * 5),
+  }
+  io.emit('EnemyFire', EnemyRandom)
+
+
   //console.log('EnemyData: ' + enemyShipArray[2][2].posx);
-}, 500);
+}, 250);
 
 function Create2DArray(rows) {
   var arr = [];
