@@ -67,6 +67,10 @@ for (let i = 0; i < 6; i++) {
   }
 }
 
+const duckdns = () => {
+  
+}
+
 //app.get('/', function (req, res) {
 //  res.sendFile(__dirname + '/test.html');
 //});
