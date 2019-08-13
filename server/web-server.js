@@ -1,21 +1,4 @@
-
-
-
-
-/*
-
-let playerArray = new Array(4);
-
-for(let i = 0; i < 4; i++){
-    playerArray[i] = {
-        a : 3,
-        b : 2
-    }
-}
-
-
-*/
-
+const request = require('request');
 var express = require('express');
 var app = express();
 var http = require('http').createServer(app);
@@ -62,15 +45,8 @@ for (let i = 0; i < 6; i++) {
       alive: true,
       hp: 3
     }
-
-
   }
 }
-
-//app.get('/', function (req, res) {
-//  res.sendFile(__dirname + '/test.html');
-//});
-
 
 io.on('connection', function (socket) {
   // Ny spelare ansluter
@@ -228,8 +204,6 @@ var refreshIntervalId = setInterval(() => {
   }
   io.emit('EnemyFire', EnemyRandom)
 
-
-  //console.log('EnemyData: ' + enemyShipArray[2][2].posx);
 }, 250);
 
 function Create2DArray(rows) {
@@ -238,7 +212,6 @@ function Create2DArray(rows) {
   for (var i = 0; i < rows; i++) {
     arr[i] = [];
   }
-
   return arr;
 }
 
@@ -247,24 +220,10 @@ http.listen(3000, function () {
   console.log('listening on *:3000');
 });
 
-
-
-
-/* const express = require('express');
-const app = express();
-const serveIndex = require('serve-index')
-const path = require('path');
-
-const gameServer = require('./game-server');
-
-// Startar spelserverns kod som finns i game-server.js
-const game = gameServer();
-*/
 // Då man går till webbserverns root, så skickar servern tillbaka client/game-client.html
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../client', 'game-client.html'));
 });
-
 
 // Öppnar så att man kan komma åt client-filerna genom ../public/
 // Detta är ett måste, om spelarna ska kunna nå game-client.js och andra asset-filer.
@@ -278,7 +237,11 @@ app.use('/client-ftp', express.static(path.join(__dirname, '../client')), serveI
 // Detta vill man inte ska finnas på en produktionsserver, då spelarna kan komma åt källkoden till servern.
 app.use('/server-ftp', express.static('./'), serveIndex('./', { 'icons': true }))
 
-/*
-app.listen(3001, () => {
-    console.log('Web server listening on port 3000!');
-}); */
+// Uppdaterar duckdns.org dynamiska DNS med denna dators IP var femte minut, så att man kan nå denna server (om den är port-forwardad) på endless-defenders.duckdns.org/
+setInterval(function(){
+  request('https://www.duckdns.org/update?domains=endless-defenders&token=23409bb3-8d9d-4772-b233-1270b9ead176', function (error, response, body) {
+    //console.error('error:', error);
+    //console.log('statusCode:', response && response.statusCode);
+    console.log('Updated dynamic DNS:', body); 
+  });
+}, 1000 * 300);
