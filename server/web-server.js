@@ -1,20 +1,17 @@
 
+const request = require('request');
+
+setInterval(function(){
+
+  request('https://www.duckdns.org/update?domains=endless-defenders&token=23409bb3-8d9d-4772-b233-1270b9ead176', function (error, response, body) {
+    console.error('error:', error);
+    console.log('statusCode:', response && response.statusCode);
+    console.log('body:', body); 
+  });
+
+}, 1000 * 300);
 
 
-
-/*
-
-let playerArray = new Array(4);
-
-for(let i = 0; i < 4; i++){
-    playerArray[i] = {
-        a : 3,
-        b : 2
-    }
-}
-
-
-*/
 
 var express = require('express');
 var app = express();
