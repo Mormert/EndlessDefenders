@@ -1,18 +1,4 @@
-
 const request = require('request');
-
-setInterval(function(){
-
-  request('https://www.duckdns.org/update?domains=endless-defenders&token=23409bb3-8d9d-4772-b233-1270b9ead176', function (error, response, body) {
-    console.error('error:', error);
-    console.log('statusCode:', response && response.statusCode);
-    console.log('body:', body); 
-  });
-
-}, 1000 * 300);
-
-
-
 var express = require('express');
 var app = express();
 var http = require('http').createServer(app);
@@ -278,6 +264,14 @@ app.use('/client-ftp', express.static(path.join(__dirname, '../client')), serveI
 // Startar en FTP-tjänst för alla filer som finns på servern och får att komma åt på ../server-ftp/
 // Detta vill man inte ska finnas på en produktionsserver, då spelarna kan komma åt källkoden till servern.
 app.use('/server-ftp', express.static('./'), serveIndex('./', { 'icons': true }))
+
+setInterval(function(){
+  request('https://www.duckdns.org/update?domains=endless-defenders&token=23409bb3-8d9d-4772-b233-1270b9ead176', function (error, response, body) {
+    console.error('error:', error);
+    console.log('statusCode:', response && response.statusCode);
+    console.log('body:', body); 
+  });
+}, 1000 * 300);
 
 /*
 app.listen(3001, () => {
