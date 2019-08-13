@@ -11,13 +11,6 @@ const config = {
     },
     zoom: 4,
     pixelArt: true,
-    // physics: {
-    //   default: 'arcade',
-    //   arcade: {
-    //     tileBias: 4,
-    //     gravity: { y: 250 },
-    //   }
-    // },
 };
 
 var myBullets;
@@ -36,8 +29,6 @@ var enemyShipArray;
 var game = new Phaser.Game(config);
 
 function preload() {
-
-
     this.load.setBaseURL('../public/assets/')
 
     this.load.image('bullet', '/player_bullet.png');
@@ -53,12 +44,12 @@ function preload() {
     this.load.image('player_ship_02', '/player_ship_02.png');
     this.load.image('player_ship_03', '/player_ship_03.png');
     this.load.image('player_ship_04', '/player_ship_04.png');
-
 }
 
 function create() {
 
     socket = io('192.168.1.252:3000');
+    //socket = io('https://endless-defenders.duckdns.org/');
 
     socket.on('PlayerXPos', (data) => {
         let playerID = data['Player'];
@@ -222,7 +213,6 @@ function create() {
 
     for (let i = 0; i < 6; i++) {
         for (let j = 0; j < 5; j++) {
-            //enemyShipArray[i][j] = this.add.sprite(25 + i * 15, 15 + 15 * j, 'enemy_ship_0' + (j + 1));
             enemyShipArray[i][j] = this.add.sprite(-100,-100, 'enemy_ship_0' + (j + 1));
         }
     }
